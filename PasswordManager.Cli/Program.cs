@@ -1,6 +1,7 @@
 ﻿using System;
 using PasswordManager.Cli.Services;
 using PasswordManager.Cli.Storage;
+using PasswordManager.Cli.Config;
 
 namespace PasswordManager.Cli
 {
@@ -9,7 +10,8 @@ namespace PasswordManager.Cli
         private static void Main(string[] args)
         {
             Console.WriteLine("Password Manager CLI");
-            string vaultPath = Environment.GetEnvironmentVariable("PM_VAULT") ?? "/home/jota/Proyectos/PasswordManager/.vault";
+            var cfg = AppConfig.Load(Environment.CurrentDirectory);
+            string vaultPath = string.IsNullOrWhiteSpace(cfg.VaultPath) ? "/home/jota/Proyectos/PasswordManager/.vault" : cfg.VaultPath!;
 
             Console.Write("Introduce la contraseña maestra: ");
             string? master = ReadSecret();
