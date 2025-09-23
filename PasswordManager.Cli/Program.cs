@@ -31,7 +31,7 @@ namespace PasswordManager.Cli
 
             if (args.Length == 0)
             {
-                Console.WriteLine("Comandos: add, list, remove <id>, genpass [len], genkeys <pub> <priv>, export <id> <pub> <out>, import <priv> <in>");
+                RunMenu(service);
                 return;
             }
 
@@ -170,6 +170,105 @@ namespace PasswordManager.Cli
                 return args[0].Substring(name.Length + 1);
             }
             return null;
+        }
+
+        private static void RunMenu(Services.VaultService service)
+        {
+            while (true)
+            {
+                Console.WriteLine();
+                Console.WriteLine("=== Password Manager ===");
+                Console.WriteLine("1) Listar contraseñas");
+                Console.WriteLine("2) Agregar contraseña");
+                Console.WriteLine("3) Eliminar contraseña");
+                Console.WriteLine("4) Generar contraseña segura");
+                Console.WriteLine("5) Generar par de claves RSA");
+                Console.WriteLine("6) Exportar entrada (RSA)");
+                Console.WriteLine("7) Importar entrada (RSA)");
+                Console.WriteLine("0) Salir");
+                Console.Write("Selecciona una opción: ");
+                string? opt = Console.ReadLine();
+                Console.WriteLine();
+
+                switch (opt)
+                {
+                    case "1":
+                        foreach (var e in service.ListEntries())
+                        {
+                            Console.WriteLine($"{e.Id} | {e.Service} | {e.Username} | {e.Password}");
+                        }
+                        break;
+                    case "2":
+                        Console.Write("Servicio: ");
+                        string serviceName = Console.ReadLine() ?? string.Empty;
+                        Console.Write("Usuario: ");
+                        string username = Console.ReadLine() ?? string.Empty;
+                        Console.Write("Password (vacío para generar): ");
+                        string? pwd = ReadSecret();
+                        if (string.IsNullOrEmpty(pwd))
+                        {
+                            pwd = Services.PasswordGenerator.Generate(16);
+                            Console.WriteLine($"\nGenerada: {pwd}");
+                        }
+                        Console.Write("Notas (opcional): ");
+                        string? notes = Console.ReadLine();
+                        var created = service.AddEntry(serviceName, username, pwd, notes);
+                        Console.WriteLine($"Creado: {created.Id}");
+                        break;
+                    case "3":
+                        Console.Write("ID a eliminar: ");
+                        string id = Console.ReadLine() ?? string.Empty;
+                        bool removed = service.RemoveEntry(id);
+                        Console.WriteLine(removed ? "Eliminado" : "ID no encontrado");
+                        break;
+                    case "4":
+                        Console.Write("Longitud (por defecto 16): ");
+                        string? lenStr = Console.ReadLine();
+                        int len = 16;
+                        if (!string.IsNullOrWhiteSpace(lenStr) && int.TryParse(lenStr, out int parsed)) len = parsed;
+                        string generated = Services.PasswordGenerator.Generate(len);
+                        Console.WriteLine(generated);
+                        break;
+                    case "5":
+                        Console.Write("Ruta clave pública: ");
+                        string pub = Console.ReadLine() ?? string.Empty;
+                        Console.Write("Ruta clave privada: ");
+                        string priv = Console.ReadLine() ?? string.Empty;
+                        new Services.ExportImportService().GenerateKeyPair(pub, priv);
+                        Console.WriteLine("Par de claves generado");
+                        break;
+                    case "6":
+                        Console.Write("ID a exportar: ");
+                        string expId = Console.ReadLine() ?? string.Empty;
+                        var entry = System.Linq.Enumerable.FirstOrDefault(service.ListEntries(), e => e.Id == expId);
+                        if (entry == null)
+                        {
+                            Console.WriteLine("ID no encontrado");
+                            break;
+                        }
+                        Console.Write("Ruta clave pública: ");
+                        string expPub = Console.ReadLine() ?? string.Empty;
+                        Console.Write("Archivo de salida: ");
+                        string expOut = Console.ReadLine() ?? string.Empty;
+                        new Services.ExportImportService().ExportEntry(entry, expPub, expOut);
+                        Console.WriteLine("Entrada exportada");
+                        break;
+                    case "7":
+                        Console.Write("Ruta clave privada: ");
+                        string impPriv = Console.ReadLine() ?? string.Empty;
+                        Console.Write("Archivo de entrada: ");
+                        string impIn = Console.ReadLine() ?? string.Empty;
+                        var imported = new Services.ExportImportService().ImportEntry(impPriv, impIn);
+                        imported = service.AddEntry(imported.Service, imported.Username, imported.Password, imported.Notes);
+                        Console.WriteLine($"Importado: {imported.Id}");
+                        break;
+                    case "0":
+                        return;
+                    default:
+                        Console.WriteLine("Opción inválida");
+                        break;
+                }
+            }
         }
     }
 }
