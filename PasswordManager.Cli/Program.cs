@@ -13,8 +13,12 @@ namespace PasswordManager.Cli
             var cfg = AppConfig.Load(Environment.CurrentDirectory);
             string vaultPath = string.IsNullOrWhiteSpace(cfg.VaultPath) ? "/home/jota/Proyectos/PasswordManager/.vault" : cfg.VaultPath!;
 
-            Console.Write("Introduce la contraseña maestra: ");
-            string? master = ReadSecret();
+            string? master = Environment.GetEnvironmentVariable("PM_PASSWORD");
+            if (string.IsNullOrEmpty(master))
+            {
+                Console.Write("Introduce la contraseña maestra: ");
+                master = ReadSecret();
+            }
             if (string.IsNullOrWhiteSpace(master))
             {
                 Console.WriteLine("Contraseña inválida");
@@ -34,14 +38,31 @@ namespace PasswordManager.Cli
             switch (args[0])
             {
                 case "add":
-                    Console.Write("Servicio: ");
-                    string serviceName = Console.ReadLine() ?? string.Empty;
-                    Console.Write("Usuario: ");
-                    string username = Console.ReadLine() ?? string.Empty;
-                    Console.Write("Password: ");
-                    string? password = ReadSecret();
-                    Console.Write("Notas (opcional): ");
-                    string? notes = Console.ReadLine();
+                    // Flags/env: --service, --username, --password, --notes o PM_SERVICE, PM_USERNAME, PM_ENTRY_PASSWORD, PM_NOTES
+                    string serviceName = GetFlag(args, "--service") ?? Environment.GetEnvironmentVariable("PM_SERVICE") ?? string.Empty;
+                    string username = GetFlag(args, "--username") ?? Environment.GetEnvironmentVariable("PM_USERNAME") ?? string.Empty;
+                    string? password = GetFlag(args, "--password") ?? Environment.GetEnvironmentVariable("PM_ENTRY_PASSWORD");
+                    string? notes = GetFlag(args, "--notes") ?? Environment.GetEnvironmentVariable("PM_NOTES");
+                    if (string.IsNullOrWhiteSpace(serviceName))
+                    {
+                        Console.Write("Servicio: ");
+                        serviceName = Console.ReadLine() ?? string.Empty;
+                    }
+                    if (string.IsNullOrWhiteSpace(username))
+                    {
+                        Console.Write("Usuario: ");
+                        username = Console.ReadLine() ?? string.Empty;
+                    }
+                    if (string.IsNullOrEmpty(password))
+                    {
+                        Console.Write("Password: ");
+                        password = ReadSecret();
+                    }
+                    if (notes == null)
+                    {
+                        Console.Write("Notas (opcional): ");
+                        notes = Console.ReadLine();
+                    }
                     var entry = service.AddEntry(serviceName, username, password ?? string.Empty, notes);
                     Console.WriteLine($"Creado: {entry.Id}");
                     break;
@@ -128,6 +149,27 @@ namespace PasswordManager.Cli
             }
             Console.WriteLine();
             return secret;
+        }
+
+        private static string? GetFlag(string[] args, string name)
+        {
+            for (int i = 0; i < args.Length - 1; i++)
+            {
+                if (string.Equals(args[i], name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return args[i + 1];
+                }
+                if (args[i].StartsWith(name + "=", StringComparison.OrdinalIgnoreCase))
+                {
+                    return args[i].Substring(name.Length + 1);
+                }
+            }
+            // manejar último arg como name=value
+            if (args.Length == 1 && args[0].StartsWith(name + "=", StringComparison.OrdinalIgnoreCase))
+            {
+                return args[0].Substring(name.Length + 1);
+            }
+            return null;
         }
     }
 }
