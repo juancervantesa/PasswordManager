@@ -2,6 +2,9 @@
 using PasswordManager.Cli.Services;
 using PasswordManager.Cli.Storage;
 using PasswordManager.Cli.Config;
+using PasswordManager.Cli.Models;
+using PasswordManager.Cli.Crypto;
+using System.Text;
 
 namespace PasswordManager.Cli
 {
@@ -9,9 +12,35 @@ namespace PasswordManager.Cli
     {
         private static void Main(string[] args)
         {
+            /* //---------------
+            // 1. Generar claves
+            var (pub, priv) = RsaToolbox.GenerateRsaKeyPair();
+
+            // 2. Exportar a PEM
+            string pubPem = RsaToolbox.ExportPublicKeyToPem(pub);
+            string privPem = RsaToolbox.ExportPrivateKeyToPem(priv);
+
+            Console.WriteLine("Clave pública PEM:\n" + pubPem);
+            Console.WriteLine("Clave privada PEM:\n" + privPem);
+
+            // 3. Importar de nuevo desde PEM
+            byte[] pub2 = RsaToolbox.ImportPublicKeyFromPem(pubPem);
+            byte[] priv2 = RsaToolbox.ImportPrivateKeyFromPem(privPem);
+
+            // 4. Cifrar y descifrar
+            var mensaje = "Hola mundo con PEM!";
+            var encrypted = RsaToolbox.EncryptWithPublicKey(pub2, Encoding.UTF8.GetBytes(mensaje));
+            var decrypted = RsaToolbox.DecryptWithPrivateKey(priv2, encrypted);
+
+            Console.WriteLine("Descifrado: " + Encoding.UTF8.GetString(decrypted));
+            //---------------- */
+
+
             Console.WriteLine("Password Manager CLI");
             var cfg = AppConfig.Load(Environment.CurrentDirectory);
+            //string vaultPath = string.IsNullOrWhiteSpace(cfg.VaultPath) ? "D:\\cursos\\Maestria\\Modulo 7\\PasswordManager\\.vault" : cfg.VaultPath!;
             string vaultPath = string.IsNullOrWhiteSpace(cfg.VaultPath) ? "/home/jota/Proyectos/PasswordManager/.vault" : cfg.VaultPath!;
+
 
             string? master = Environment.GetEnvironmentVariable("PM_PASSWORD");
             if (string.IsNullOrEmpty(master))
@@ -171,6 +200,15 @@ namespace PasswordManager.Cli
             }
             return null;
         }
+        public static string Enmascarar(string password)
+        {
+            if (string.IsNullOrEmpty(password))
+                return string.Empty;
+            return new string('*', password.Length);
+        }
+
+    
+
 
         private static void RunMenu(Services.VaultService service)
         {
@@ -185,6 +223,8 @@ namespace PasswordManager.Cli
                 Console.WriteLine("5) Generar par de claves RSA");
                 Console.WriteLine("6) Exportar entrada (RSA)");
                 Console.WriteLine("7) Importar entrada (RSA)");
+                Console.WriteLine("8) Copiar Contraseña");
+
                 Console.WriteLine("0) Salir");
                 Console.Write("Selecciona una opción: ");
                 string? opt = Console.ReadLine();
@@ -193,9 +233,28 @@ namespace PasswordManager.Cli
                 switch (opt)
                 {
                     case "1":
+                        // Definir anchos de columna
+                        int idWidth = 32;
+                        int serviceWidth = 18;
+                        int userWidth = 18;
+                        int passWidth = 16;
+                        // Encabezados
+                        Console.WriteLine(
+                            $"{"ID".PadRight(idWidth)} | {"Servicio".PadRight(serviceWidth)} | {"Usuario".PadRight(userWidth)} | {"Contraseña".PadRight(passWidth)}"
+                        );
+                        Console.WriteLine(new string('-', idWidth + serviceWidth + userWidth + passWidth + 9));
+
                         foreach (var e in service.ListEntries())
                         {
-                            Console.WriteLine($"{e.Id} | {e.Service} | {e.Username} | {e.Password}");
+                            Console.WriteLine(
+                             $"{e.Id.PadRight(idWidth)} | {e.Service.PadRight(serviceWidth)} | {e.Username.PadRight(userWidth)} | {Enmascarar(e.Password).PadRight(passWidth)}"
+               );
+
+                           // Console.WriteLine($" Id: {e.Id} | Sitio: {e.Service} | Usuario: {e.Username} | Contraseña:  {Enmascarar(e.Password)}");
+                           
+                               // Console.WriteLine($"Sitio: {entry.Site}, Usuario: {entry.Username}, Contraseña: {Enmascarar(entry.Password)}");
+                          
+
                         }
                         break;
                     case "2":
@@ -262,6 +321,14 @@ namespace PasswordManager.Cli
                         imported = service.AddEntry(imported.Service, imported.Username, imported.Password, imported.Notes);
                         Console.WriteLine($"Importado: {imported.Id}");
                         break;
+                    case "8":
+                        Console.Write("ID de la contraseña a copiar: ");
+                        string idCopy = Console.ReadLine() ?? string.Empty;
+                        bool copy = service.CopyEntry(idCopy);
+                        Console.WriteLine("Contraseña copiada al portapapeles.");
+                        break;
+
+
                     case "0":
                         return;
                     default:

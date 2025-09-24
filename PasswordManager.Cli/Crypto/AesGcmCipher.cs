@@ -3,10 +3,10 @@ using System.Security.Cryptography;
 
 namespace PasswordManager.Cli.Crypto
 {
-    /// <summary>
-    /// Cifrado y descifrado con AES-GCM (AEAD). Requiere clave de 16/24/32 bytes.
-    /// Empaqueta: nonce (12), tag (16) y ciphertext.
-    /// </summary>
+   
+    //Cifrado y descifrado con AES-GCM (AEAD). Requiere clave de 16/24/32 bytes.
+    //Empaqueta: nonce (12), tag (16) y ciphertext.
+ 
     public static class AesGcmCipher
     {
         public static byte[] Encrypt(byte[] key, byte[] plaintext, byte[]? associatedData = null)
@@ -53,5 +53,6 @@ namespace PasswordManager.Cli.Crypto
         }
     }
 }
+
 
 

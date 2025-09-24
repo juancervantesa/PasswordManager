@@ -4,6 +4,7 @@ using System.Linq;
 using PasswordManager.Cli.Crypto;
 using PasswordManager.Cli.Models;
 using PasswordManager.Cli.Storage;
+using TextCopy;
 
 namespace PasswordManager.Cli.Services
 {
@@ -58,6 +59,16 @@ namespace PasswordManager.Cli.Services
             Persist();
             return true;
         }
+        public bool CopyEntry(string id)
+        {
+            EnsureLoaded();
+            var entry = _cachedVault!.Entries.FirstOrDefault(e => e.Id == id);
+            if (entry == null) return false;
+            TextCopy.ClipboardService.SetText(entry.Password);
+            
+            return true;
+        }
+
 
         private void Persist()
         {
@@ -71,5 +82,6 @@ namespace PasswordManager.Cli.Services
         }
     }
 }
+
 
 

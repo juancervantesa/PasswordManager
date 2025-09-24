@@ -133,3 +133,4 @@ dotnet run --project PasswordManager.Cli -- import priv.key salida.enc
 ## 12. Licencia y Créditos
 - Licencia: MIT
 - Autoría: Estructura y desarrollo del ejemplo dentro del repositorio.
+

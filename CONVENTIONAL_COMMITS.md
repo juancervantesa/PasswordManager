@@ -21,3 +21,4 @@ Ejemplos:
 - `feat(cli): add password generator`
 - `fix(storage): handle corrupted vault`
 - `docs: update README with setup instructions`
+

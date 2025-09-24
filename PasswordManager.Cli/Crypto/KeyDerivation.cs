@@ -3,9 +3,9 @@ using System.Security.Cryptography;
 
 namespace PasswordManager.Cli.Crypto
 {
-    /// <summary>
-    /// Deriva claves simétricas a partir de una contraseña usando PBKDF2 con HMACSHA256.
-    /// </summary>
+    
+    // Deriva claves simétricas a partir de una contraseña usando PBKDF2 con HMACSHA256.
+
     public static class KeyDerivation
     {
         public static byte[] GenerateRandomSalt(int saltLengthBytes = 16)
@@ -32,5 +32,6 @@ namespace PasswordManager.Cli.Crypto
         }
     }
 }
+
 
 

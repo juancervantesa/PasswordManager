@@ -1,8 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "/Peq/yIsZ+s=",
+  "dgSpecHash": "Y/WV1L9bgPE=",
   "success": true,
   "projectFilePath": "/home/jota/Proyectos/PasswordManager/PasswordManager.Cli/PasswordManager.Cli.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "/home/jota/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/7.0.0/microsoft.extensions.dependencyinjection.abstractions.7.0.0.nupkg.sha512",
+    "/home/jota/.nuget/packages/textcopy/6.2.1/textcopy.6.2.1.nupkg.sha512"
+  ],
   "logs": []
 }
