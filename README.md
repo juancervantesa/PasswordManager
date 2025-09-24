@@ -30,6 +30,11 @@ dotnet run --project PasswordManager.Cli -- genkeys pub.key priv.key
 dotnet run --project PasswordManager.Cli -- export <id> pub.key salida.enc
 dotnet run --project PasswordManager.Cli -- import priv.key salida.enc
 ```
+## Uso Normal
+```
+# Ejecutar Aplicación
+export PM_VAULT=/ruta/.vault && export PM_PASSWORD="ClaveMaestra123" && dotnet run --project /ruta/PasswordManager.Cli -- list | cat
+```
 
 ## Seguridad
 - Derivación de clave: PBKDF2-HMACSHA256 (210k iteraciones)
