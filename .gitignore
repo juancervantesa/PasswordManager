@@ -1,0 +1,49 @@
+# --- .NET build outputs ---
+bin/
+obj/
+
+# Project-specific build outputs
+PasswordManager.Cli/bin/
+PasswordManager.Cli/obj/
+
+# IDE/editor folders
+.vs/
+.vscode/
+.idea/
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# User-specific files
+*.user
+*.suo
+*.userprefs
+
+# Logs & temp
+*.log
+*.tmp
+*.swp
+
+# Security-sensitive artifacts
+.vault
+*.key
+*.pem
+*.pfx
+*.snk
+*.enc
+
+# NuGet
+*.nupkg
+**/packages/*
+
+# Rider caches
+.sln.iml
+
+# Coverage/analysis
+coverage/
+TestResult*/
+*.coverage*
+
+
